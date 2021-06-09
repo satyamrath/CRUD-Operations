@@ -1,0 +1,248 @@
+{% extends 'myApp/basic.html' %}
+
+
+{% block title %} CRUD Home {% endblock %}
+
+{% block css %}
+<style>
+  @import "https://use.fontawesome.com/releases/v5.5.0/css/all.css";
+  
+	/* CSS for Pagination begins here */  
+	#pagination a{
+		text-decoration: none;
+		color: red;
+		margin: auto 8px auto 8px;
+	}
+	#pagination a:hover{
+		color: blue;
+	}
+	/* CSS for Pagination ends here */
+
+
+	/* CSS for Advanced Search begins here */
+	* {
+        margin: 0;
+        padding: 0;
+        font-family: "montserrat", sans-serif;
+    }
+	
+	/*
+    body {
+        background: #333;
+	}
+	*/
+    
+    .filter-box {
+		background-color: #555;
+        padding: 20px 40px;
+        text-align: center;
+        color: white;
+    }
+    
+    
+    .query-box {
+        height: auto;
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        /*its better to use inline-flex*/
+    }
+    
+    .query-box i {
+        background: #2f3542;
+        width: 40px;
+        line-height: 40px;
+    }
+    
+    .tbox,
+    .adv-search {
+        margin: 0;
+        padding: 0;
+        border: red;
+        outline: none;
+    }
+    
+    .tbox {
+        width: 0px;
+        transition: 0.6s;
+    }
+    
+    .query-box:hover>.tbox,
+    .tbox:focus {
+        width: 160px;
+        padding: 0 10px;
+    }
+    
+    .adv-search {
+        background: #2f3542;
+        color: white;
+        padding: 0 10px;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+
+    @media only screen and (max-width: 1000px) {
+      /* For mobile phones: */
+      .query-box {
+        height: auto;
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        /*its better to use inline-flex*/
+      }
+        
+      .query-box:hover>.tbox,
+      .tbox:focus {
+          width: 150px;
+          padding: 0 10px;
+          display: block;
+          flex: 80%;
+      }
+    }
+
+	/* CSS for Advanced Search ends here */
+</style>
+{% endblock %}
+
+
+{% block body %}
+
+<div class="filter-box">
+    <form action="/search">
+      <div class="query-box">
+        <i class="fa fa-search"></i>
+        <input class="tbox" type="text" name="title_query" value="" placeholder="Title">    
+        <input class="tbox" type="text" name="author_query" placeholder="Author">
+        <input class="tbox" type="text" name="subject_query" placeholder="Subject">
+        <input class="tbox" type="text" name="document_type_query" placeholder="Document Type">
+        <button class="adv-search" type="submit" name="button">advanced search</button>
+      </div>
+    </form>
+  </div>
+
+<div class="container">
+
+  <!-- <pre>
+    {{ documents.has_previous }}
+    {{ documents.number }}
+    {{ documents.paginator.count }}
+    {{ documents.paginator.num_pages }}
+    {{ documents.paginator.page_range }}
+    {{ documents.has_next }}
+  </pre>  -->
+
+
+
+
+
+    {% for document in documents %}
+    <div class="card my-4">
+        <div class="card-header">
+          <h2 style="display: inline; text-transform: uppercase;">{{document.document_type}}</h2>
+
+          <form method="POST" action="/delete/{{ document.id }}" style="display: inline;"> {% csrf_token %}
+            <button style="float: right;" type="submit" class="btn btn-light">
+              <!-- delete icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+              </svg>
+            </button>
+          </form>
+
+        </div>
+
+        <div class="card-body">
+          <h5 class="card-title">
+
+            {{ document.document_title }}
+          </h5>
+          <div>
+            <i class="fas fa-user" style="width: 16px;"></i>
+            <span class="mx-3">{{ document.author }}</span>
+          </div>
+          <div>
+            <i class="fas fa-clock"></i>
+            <span class="mx-3">{{ document.creation_time }}</span>
+          </div>
+          <div>
+            <i class="fas fa-list"></i>
+            <p class="card-text d-inline mx-3">{{ document.subject }}</p>
+          </div>
+
+          <!-- edit icon -->
+          <a href="/update/{{document.id}}" class="btn btn-light">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+              <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+            </svg>
+          </a>
+
+          <!-- download icon -->
+          <a href="{{document.document_file.url}}" class="btn btn-light" download>
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-arrow-down-square-fill" viewBox="0 0 16 16">
+              <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5a.5.5 0 0 1 1 0z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+
+</div>
+
+
+{% if documents.paginator.count > 0 %}
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+	  
+			
+			{% if documents.has_previous %}
+			<li class="page-item">
+				<a class="page-link" href="?page=1" aria-label="First">
+				<span aria-hidden="true">&laquo;</span>
+				</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="?page={{ documents.previous_page_number }}" aria-label="Previous">
+				<span aria-hidden="true">	&lsaquo;</span>
+				</a>
+			</li>
+			{% endif %}
+
+
+			{% for num in documents.paginator.page_range %}
+			{% if documents.number == num %}
+				<li class="page-item active"><a class="page-link text-light"><strong>{{ num }}</strong></a></li>
+			{% elif num > documents.number|add:'-3' and num < documents.number|add:'3' %}
+
+				<li class="page-item"><a class="page-link" href="?page={{num}}">{{ num }}</a></li>
+			{% endif %}
+			{% endfor %}
+			
+			{% if documents.has_next %}
+			<li class="page-item">
+				<a class="page-link" href="?page={{ documents.next_page_number }}" aria-label="Next">
+				<span aria-hidden="true">&rsaquo;</span>
+				</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="?page={{ documents.paginator.num_pages }}" aria-label="Last">
+				<span aria-hidden="true">	&raquo;</span>
+				</a>
+			</li>
+			{% endif %}
+		</ul>
+    </nav>
+	{% else %}
+		<div class="container my-5">
+			<div class="card">
+			  <div class="card-body text-danger">
+				There is no document in the database, Please Upload to see here.
+			  </div>
+			</div>
+		  </div>
+
+	{% endif %}
+
+
+{% endblock %}

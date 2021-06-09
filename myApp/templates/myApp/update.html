@@ -1,0 +1,140 @@
+{% extends 'myApp/basic.html' %}
+
+
+{% block title %} Update {% endblock %}
+
+{% block body %}
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <strong>Acceptable file formats are</strong> jpg, jpeg, png, gif, doc, docx, ppt, pptx, pdf 
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<div class="container">
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validate()"> {% csrf_token %}
+
+        <div class="mb-3">
+			<label for="document_title" class="form-label">Title</label>
+			<input type="text" class="form-control" name="document_title" id="id_document_title" aria-describedby="document_titleHelp" maxlength="200" required value="{{ document_form.document_title.value }}">
+			<div id="document_titleHelp" class="form-text text-danger" hidden>Title should contain only letters, spaces and minimum 3 characters.</div>
+	
+		  </div>
+
+        <div class="mb-3">
+		  <label for="author" class="form-label">Author</label>
+          <input type="text" class="form-control" name="author" id="id_author" required maxlength="200"  value="{{ document_form.author.value }}" aria-describedby="authorHelp" oninput="return validateAuthor()">
+          <div id="authorHelp" class="form-text text-danger" hidden>Author Name should contain only letters, spaces, commas, periods and minimum 3 characters.</div>
+  
+        </div>
+        <div class="mb-3">
+		  <label for="subject" class="form-label">Subject</label>
+          <input type="text" class="form-control" name="subject" id="id_subject" required maxlength="200"  value="{{ document_form.subject.value }}" aria-describedby="subjectHelp" oninput="return validateSubject()">
+          <div id="subjectHelp" class="form-text text-danger" hidden>Subject should contain only letters, spaces, digits, underscores, hyphens, commas, periods and minimum 3 characters.</div>
+		</div>
+
+		<input type="hidden" name="creation_time" required id="id_creation_time">
+		<input type="hidden" name="document_type" value="{{ document_form.document_type.value }}" required id="id_document_type">
+
+		
+        <div class="mb-3">
+            <div id="" class="form-text text-danger">Currently: 
+            <a href="../media/{{ document_form.document_file.value }}" style="text-decoration: none;">{{ document_form.document_file.value }}</a>
+            </div>
+            <!-- {{document_form.document_file}} -->
+			<input class="form-control" type="file" name="document_file" id="id_document_file" aria-describedby="formFileHelp" oninput="return validateFile()">
+            <div id="formFileHelp" class="form-text text-danger" hidden>Acceptable file formats are jpg, jpeg, png, gif, doc, docx, ppt, pptx, pdf</div>
+		</div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+</div>
+
+
+<script>
+	function validateAuthor(){
+		let myExp=/^[a-zA-Z,\.\ ]{3,}$/;
+        let author = document.getElementById("id_author").value;
+		author = author.replace(/\s+/g,' ').trim();
+        if(! author.match(myExp) ){ 
+			document.getElementById("authorHelp").hidden = false;
+			return false;
+		}else{
+			document.getElementById("authorHelp").hidden = true;
+			return true;
+		}
+	}
+	function validateSubject(){
+		let myExp=/^[_a-zA-Z\d,\.\ -]{3,}$/;
+        let subject = document.getElementById("id_subject").value;
+		subject = subject.replace(/\s+/g,' ').trim();
+        if(! subject.match(myExp) ){ 
+			document.getElementById("subjectHelp").hidden = false;
+			return false;
+		}else{
+			document.getElementById("subjectHelp").hidden = true;
+			return true;
+		}
+	}
+	function validateFile(){
+        let formFile = document.getElementById("id_document_file").value;
+        if(formFile == ""){
+            return true;
+        }
+		formFile = formFile.toLowerCase();
+		if(formFile.length == 0){
+			document.getElementById("formFileHelp").hidden = false;
+			return false;
+		}else{
+			let fileCheck = formFile.endsWith(".jpg") || formFile.endsWith(".jpeg") || formFile.endsWith(".png") || formFile.endsWith(".gif") || formFile.endsWith(".doc") || formFile.endsWith(".docx") || formFile.endsWith(".ppt") || formFile.endsWith(".pptx") || formFile.endsWith(".pdf");
+			if(fileCheck){
+				document.getElementById("formFileHelp").hidden = true;
+				return true;
+			}else{
+				document.getElementById("formFileHelp").hidden = false;
+				return false;
+			}
+		}
+	}
+	
+	function formatDate(date) {
+		var d = new Date(date),
+			month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear();
+	
+		if (month.length < 2) 
+			month = '0' + month;
+		if (day.length < 2) 
+			day = '0' + day;
+		hour = d.getHours(),
+		minute = d.getMinutes(),
+		second = d.getSeconds();
+		
+		let formatted_date = [year, month, day].join('-') + " " + [hour, minute, second].join(':')
+		return formatted_date;
+	}
+
+	function changeCreationTime(){
+		let currentTime = formatDate(new Date());
+		document.getElementById("id_creation_time").value = currentTime;
+	}
+	function getFileType(){
+        let val = document.getElementById("id_document_file").value.toLowerCase();
+        if(val == ""){
+            return true;
+        }
+		let lastpos = val.lastIndexOf(".");
+		let extension = val.substr(lastpos+1);
+		document.getElementById("id_document_type").value = extension;
+	}
+	
+    function validate(){
+		changeCreationTime();
+		getFileType();
+		let flagAuthor = validateAuthor();
+		let flagSubject = validateSubject();
+		let flagFile = validateFile();
+		let flag = flagAuthor && flagSubject && flagFile;
+		return flag;
+    }
+</script>
+
+{% endblock %}
